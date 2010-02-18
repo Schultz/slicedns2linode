@@ -3,7 +3,7 @@
 
 # Installation
 
-# Grab script from Github open it and replace your SLICEHOST_API_KEY, LINODE_API_KEY and EMAIL_ADDRESS
+Grab script from Github open it and replace your SLICEHOST\_API\_KEY, LINODE\_API\_KEY and EMAIL_ADDRESS
 
 # Usage
 
@@ -14,11 +14,13 @@ There is only 1 required arguments for the script. The name of your domain with 
 # Requirements
 
 You need to make sure you have activeresource installed
-gem install activeresource
+
+    gem install activeresource
 
 You need to have linode ruby library intalled
-gem install linode
+
+    gem install linode
 
 # TODO 
-Create GEM 
+Create GEM  
 Create Test coverage
