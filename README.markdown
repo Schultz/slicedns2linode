@@ -5,9 +5,13 @@
 
 Grab script from Github open it and replace your SLICEHOST\_API\_KEY, LINODE\_API\_KEY and EMAIL_ADDRESS
 
+And then run
+
+  $ bundle install
+
 # Usage
 
-    ./slicedns2linode.rb domain1.com. [domain2.com.]
+    bundle exec ./slicedns2linode.rb domain1.com. [domain2.com.]
 
 There is only 1 required argument for the script. The name of your domain with the trailing period [.]. You can add additional domains to be transferred in a single run just separate them with a space
 
@@ -21,9 +25,9 @@ You need to have a working ruby and rubygems installation
 	# Fedora Install
 	$ [sudo] yum install ruby rubygems
 	
-You need to make sure you have activeresource and linode installed
+You need to make sure you have bundler installed
 
-    $ [sudo] gem install activeresource linode
+    $ [sudo] gem install bundler
 
 # TODO 
 Create GEM  
