@@ -58,7 +58,6 @@ error "Usage: slice2linode.rb domain.com. [domain2.com.] ..." if ARGV.empty? || 
 ARGV.each do |arg|
   # Slicehost requires . at the end of the domain name
   zone = Zone.find_by_name(arg)
-  exit if zone.nil?
   if zone.nil? then
     $LOG.warn "No valid zone named #{arg} found"
     next
@@ -66,7 +65,7 @@ ARGV.each do |arg|
   
   # Initiate Linode gem
   l = Linode.new(:api_key => LINODE_API_KEY)
-  error "#{arg} already exists at linode please delete" if l.domain.list().find {|domain| domain.domain == zone.domain }
+  error "#{arg} already exists at linode please delete" if l.domain.list.find {|domain| domain.domain == zone.domain }
   
   # create linode domain - set it to INACTIVE by default
   puts "Creating #{zone.domain} @ linode.com"
@@ -78,20 +77,24 @@ ARGV.each do |arg|
   records.delete_if { |record| record.ns? }
   
   records.each do |record|
-    case record.kind
-    when 'srv'
-      puts "Creating SRV record"
-      srvce, protocol = record.name.split(/\./)
-      weight, port, target = record.data.split(' ')
-      l.domain.resource.create(:DomainID => domain.domainid, :Type => 'SRV', :Name => srvce, :Priority => record.aux, :Target => target, 
-                               :Priority => record.aux, :Weight => weight, :Port => port, :Protocol => protocol.sub('_',''), :TTL_sec => record.ttl)
-    when 'mx'
-      puts "Creating MX record"
-      l.domain.resource.create(:DomainID => domain.domainid, :Type => 'MX', :Target => record.data, :Priority => record.aux, :TTL_sec => record.ttl)
-    when 'txt', 'cname', 'a'
-      puts "Creating #{record.record_type} record"
-      name = record.a? && record.name == zone.origin ? '' : record.name
-      l.domain.resource.create(:DomainID => domain.domainid, :Type => record.record_type, :Name => name, :Target => record.data, :TTL_sec => record.ttl)
+    begin
+      case record.kind
+      when 'srv'
+        puts "Creating SRV record"
+        srvce, protocol = record.name.split(/\./)
+        weight, port, target = record.data.split(' ')
+        l.domain.resource.create(:DomainID => domain.domainid, :Type => 'SRV', :Name => srvce, :Priority => record.aux, :Target => target, 
+                                 :Priority => record.aux, :Weight => weight, :Port => port, :Protocol => protocol.sub('_',''), :TTL_sec => record.ttl)
+      when 'mx'
+        puts "Creating MX record"
+        l.domain.resource.create(:DomainID => domain.domainid, :Type => 'MX', :Target => record.data, :Priority => record.aux, :TTL_sec => record.ttl)
+      when 'txt', 'cname', 'a'
+        puts "Creating #{record.record_type} record"
+        name = record.a? && record.name == zone.origin ? '' : record.name
+        l.domain.resource.create(:DomainID => domain.domainid, :Type => record.record_type, :Name => name, :Target => record.data, :TTL_sec => record.ttl)
+      end
+    rescue RuntimeError
+      $LOG.warn "Failed to import record #{name} of type #{record.record_type}, you will need to manually import this record"
     end
   end
   puts "Done importing #{zone.domain}"
