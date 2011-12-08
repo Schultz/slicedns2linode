@@ -59,6 +59,10 @@ ARGV.each do |arg|
   # Slicehost requires . at the end of the domain name
   zone = Zone.find_by_name(arg)
   exit if zone.nil?
+  if zone.nil? then
+    $LOG.warn "No valid zone named #{arg} found"
+    next
+  end
   
   # Initiate Linode gem
   l = Linode.new(:api_key => LINODE_API_KEY)
